@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -13,23 +12,25 @@ import (
 
 func setupRoutes(app *fiber.App) {
 	app.Get("/:url", routes.ResolveURL)
-
 	app.Post("/api/v1", routes.ShortenURL)
-
 }
 
 func main() {
 	err := godotenv.Load()
-
 	if err != nil {
-		fmt.Println(err)
+		log.Println("Error loading .env file, using environment variables")
 	}
+
 	app := fiber.New()
 
 	app.Use(logger.New())
 
 	setupRoutes(app)
 
-	log.Fatal(app.Listen(os.Getenv("APP_PORT")))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3000"
+	}
 
+	log.Fatal(app.Listen(":" + port))
 }

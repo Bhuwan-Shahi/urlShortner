@@ -1,0 +1,13 @@
+# Dockerfile.redis
+FROM redis:alpine
+
+# Add custom Redis configuration
+COPY redis.conf /usr/local/etc/redis/redis.conf
+
+# Create data directory
+RUN mkdir -p /data && chown redis:redis /data
+
+EXPOSE 6379
+
+# Start Redis with persistence
+CMD ["redis-server", "/usr/local/etc/redis/redis.conf"]

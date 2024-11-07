@@ -2,29 +2,36 @@ package database
 
 import (
 	"context"
+	"fmt"
 	"os"
+	"time"
 
 	"github.com/go-redis/redis/v8"
 )
 
-// Ctx is the background context used for Redis operations
 var Ctx = context.Background()
 
-// CreateClient creates and returns a new Redis client
-// dbNo parameter specifies which Redis database to use
-func CreateClient(dbNo int) *redis.Client {
-	// Create new Redis client with configuration from environment variables
+func CreateClient(dbNo int) (*redis.Client, error) {
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     os.Getenv("DB_ADDRESS"),  // Fixed environment variable name
-		Password: os.Getenv("DB_PASSWORD"), // Fixed environment variable name
-		DB:       dbNo,
+		Addr:         os.Getenv("DB_ADDRESS"),
+		Password:     os.Getenv("DB_PASSWORD"),
+		DB:           dbNo,
+		DialTimeout:  10 * time.Second,
+		ReadTimeout:  30 * time.Second,
+		WriteTimeout: 30 * time.Second,
+		PoolSize:     10,
+		PoolTimeout:  30 * time.Second,
 	})
 
-	// Verify connection
-	_, err := rdb.Ping(Ctx).Result()
-	if err != nil {
-		panic("Failed to connect to Redis: " + err.Error())
+	// Test connection with retry
+	for i := 0; i < 3; i++ {
+		_, err := rdb.Ping(Ctx).Result()
+		if err == nil {
+			return rdb, nil
+		}
+		fmt.Printf("Failed to connect to Redis (attempt %d/3): %v\n", i+1, err)
+		time.Sleep(time.Second * 2)
 	}
 
-	return rdb
+	return nil, fmt.Errorf("failed to connect to Redis after 3 attempts")
 }

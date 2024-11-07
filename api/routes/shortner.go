@@ -35,8 +35,12 @@ func ShortenURL(c *fiber.Ctx) error {
 		})
 	}
 
-	// Implement rate limiting
-	r2 := database.CreateClient(1)
+	r2, err := database.CreateClient(1)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to connect to rate limit database",
+		})
+	}
 	defer r2.Close()
 
 	// Get current user's rate limit
@@ -87,7 +91,12 @@ func ShortenURL(c *fiber.Ctx) error {
 		id = body.CustomShort
 	}
 
-	r := database.CreateClient(0)
+	r, err := database.CreateClient(0)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to connect to database",
+		})
+	}
 	defer r.Close()
 
 	// Check if custom short URL already exists
