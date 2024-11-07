@@ -7,7 +7,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - DB_ADDRESS=redis:6379  # Internal port stays same
+      - DB_ADDRESS=redis:6379  
       - DB_PASSWORD=
       - API_QUOTA=10
       - DOMAIN=localhost:3000
@@ -21,7 +21,7 @@ services:
       context: .
       dockerfile: Dockerfile.redis
     ports:
-      - "6380:6379"  # Changed external port to 6380
+      - "6380:6379" 
     volumes:
       - redis-data:/data
     command: redis-server --appendonly yes
@@ -32,6 +32,5 @@ networks:
   url-shortener:
     driver: bridge
 
-# Add this volumes section at the root level
 volumes:
   redis-data:

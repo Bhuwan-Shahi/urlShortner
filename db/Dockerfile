@@ -16,12 +16,11 @@ COPY . .
 # Build the application
 RUN go build -o main .
 
-# Use a smaller base image for the final stage
 FROM alpine:latest
 WORKDIR /app
 COPY --from=0 /app/main .
 
-# Expose the port your application runs on
+# Expose the port  application runs on
 EXPOSE 3000
 
 CMD ["./main"]
